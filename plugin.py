@@ -18,6 +18,8 @@ from src.plugin_system import (
     ConfigField,
     EventType,
 )
+
+from src.plugin_system.base.base_events_handler import BaseEventHandler
 from src.common.logger import get_logger
 from src.config.config import global_config  # 引入机器人自身信息
 
@@ -479,32 +481,32 @@ class SilentEventInterceptor(BaseEventHandler):
     weight = 10_000  # 极高权重，确保最先执行
     intercept_message = True
 
-    async def execute(self, message) -> tuple[bool, bool, str | None]:
+    async def execute(self, message) -> tuple[bool, bool, str | None, str | None, str | None]:
         try:
             # 仅群聊生效
             if not getattr(message, "is_group_message", False):
-                return True, True, None
+                return True, True, None, None, None
 
             platform = str(message.message_base_info.get("platform", ""))
             group_id = str(message.message_base_info.get("group_id", ""))
             if not platform or not group_id:
-                return True, True, None
+                return True, True, None, None, None
 
             if SilentStatus.is_muted(platform, group_id):
                 # 允许@打断与“张嘴”关键词解除
                 text = getattr(message, "plain_text", "") or ""
                 if is_open_mouth_keyword(text) or (_contains_at(text) and ALLOW_AT_BREAK):
                     SilentStatus.clear_mute(platform, group_id)
-                    return True, True, None
+                    return True, True, None, None, None
 
                 # 阻断后续处理
                 SilentStatus.log_summary(platform, group_id)
-                return True, False, "静音拦截"
+                return True, False, "静音拦截", None, None
 
-            return True, True, None
+            return True, True, None, None, None
         except Exception as e:
             logger.error(f"[SilentEventInterceptor] 执行异常: {e}")
-            return False, True, str(e)
+            return False, True, str(e), None, None
 
 # =============== 最小补丁 ===============
 

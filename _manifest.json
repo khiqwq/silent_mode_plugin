@@ -12,7 +12,7 @@
   "repository_url": "https://github.com/khiqwq/silent_mode_plugin",
   "host_application": {
     "min_version": "0.8.0",
-    "max_version": "0.10.0"
+    "max_version": "0.11.0"
   },
   "keywords": ["silent", "mute", "shutup", "maibot", "群聊"],
   "categories": ["Moderation", "Management"],
